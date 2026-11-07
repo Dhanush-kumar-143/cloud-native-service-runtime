@@ -3,10 +3,19 @@ import json
 import os
 import socket
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from pathlib import Path
 
-APP_NAME = os.getenv("APP_NAME", "demo-app")
-VERSION = os.getenv("VERSION", "1.0.0")
+def get_config_value(filename, env_name, default):
+    config_file = Path("/etc/demo-config") / filename
 
+    try:
+        value = config_file.read_text().strip()
+        if value:
+            return value
+    except OSError:
+        pass
+
+    return os.getenv(env_name, default)
 
 class RequestHandler(BaseHTTPRequestHandler):
 
@@ -22,10 +31,10 @@ class RequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == "/":
             self.send_json(200, {
-                "app": APP_NAME,
-                "version": VERSION,
+                "app": get_config_value("appName", "APP_NAME", "demo-app"),
+                "version": get_config_value("version", "VERSION", "1.0.0"),
                 "pod": socket.gethostname()
-            })
+             })
 
         elif self.path == "/healthz":
             self.send_json(200, {

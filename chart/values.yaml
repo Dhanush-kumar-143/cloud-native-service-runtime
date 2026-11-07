@@ -1,0 +1,27 @@
+replicaCount: 2
+
+image:
+  repository: demo-app
+  tag: "1.0.0"
+  pullPolicy: IfNotPresent
+
+config:
+  appName: cloud-native-service-runtime
+  version: "1.0.0"
+
+service:
+  port: 80
+  targetPort: 8080
+
+ingress:
+  enabled: true
+  className: nginx
+  host: demo.local
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 64Mi
+  limits:
+    cpu: 500m
+    memory: 128Mi

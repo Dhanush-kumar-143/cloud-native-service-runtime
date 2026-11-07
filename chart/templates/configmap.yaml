@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-config
+  labels:
+    {{- include "cloud-native-service-runtime.labels" . | nindent 4 }}
+data:
+  appName: {{ .Values.config.appName | quote }}
+  version: {{ .Values.config.version | quote }}
