@@ -21,6 +21,7 @@ backend:
     APP_MODE: "api"
     APP_NAME: "backend"
     VERSION: "2.0.0"
+    PORT: "8080"
   resources:
     requests:
       cpu: "50m"

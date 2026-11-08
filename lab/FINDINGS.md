@@ -81,15 +81,12 @@ The existing migration Job had an immutable pod template, so deleted the old Job
 
 ---
 
-## Defect 5
+### Defect 5: Backend port mismatch
 
-**Symptom:**
-
-**Cause:**
-
-**Fix:**
-
-**How I found it:**
+- **Symptom:** Backend pod was Running but not Ready; health check failed.
+- **Cause:** The application defaulted to port 8081, while the chart's container port and readiness probe used 8080.
+- **Fix:** Added `PORT: "8080"` under `backend.env` in `values.yaml`.
+- **Verification:** Backend became 1/1 Ready. `scenario.sh verify` passed the backend readiness and health endpoint checks.
 
 ---
 
