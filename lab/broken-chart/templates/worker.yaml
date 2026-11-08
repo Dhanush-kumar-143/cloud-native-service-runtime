@@ -48,6 +48,6 @@ spec:
               drop: ["ALL"]
           resources:
             {{- toYaml .Values.worker.resources | nindent 12 }}
-          volumes:
-            - name: worker-cache
-              emptyDir: {}
+      volumes:
+        - name: worker-cache
+          emptyDir: {}

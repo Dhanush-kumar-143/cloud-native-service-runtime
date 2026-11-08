@@ -99,5 +99,46 @@ The existing migration Job had an immutable pod template, so deleted the old Job
 
 ---
 
+### Additional investigation — Reporter (unresolved)
+
+**Symptom:** Reporter remained Running but NotReady. Logs repeatedly showed:
+`pod list failed: parse pod list: unexpected end of JSON input`
+and `/healthz` returned HTTP 503.
+
+**Investigation:**
+1. Confirmed the reporter uses ServiceAccount `reporter` in namespace `debug-lab`.
+2. Confirmed the projected service-account token and CA certificate are mounted.
+3. Confirmed `kubectl auth can-i list pods --as=system:serviceaccount:debug-lab:reporter -n debug-lab` returned `yes`.
+4. A diagnostic pod using the reporter ServiceAccount queried the namespaced Kubernetes API successfully.
+5. The API returned HTTP 200 and a valid PodList JSON response.
+6. Inspected the reporter Deployment, namespace, ServiceAccount, port, and environment variables.
+7. Found that the original RoleBinding referenced ServiceAccount `default`, not `reporter`. The authorization check for `default` returned `no`.
+8. Changed the RoleBinding subject to `reporter`. Also added `watch` to the Role while investigating the reporter's namespace-watching behavior.
+9. Added `PORT: "8080"` to the reporter environment, but the parsing error persisted.
+
+**Current conclusion:** The API request succeeds from a diagnostic pod, but the reporter application still fails to parse its pod-list response. The exact application-side root cause has not been established.
+
+**Status:** Unresolved. The RoleBinding correction fixed the ServiceAccount authorization mismatch, but did not fix reporter readiness. The additional `watch` permission and reporter port setting did not resolve the parsing error. Further investigation of the reporter application's API client and response handling is required.
+---
+
 If you ran out of time on any defect, say so here and describe what you would
 have tried next — that section is read carefully and counts in your favour.
+
+
+**Final verification:**
+
+```text
+==> verifying goal state in namespace debug-lab
+  PASS  migrate Job completed
+  PASS  deployment backend: 1/1 ready
+  PASS  deployment gateway: 1/1 ready
+  PASS  deployment worker: 1/1 ready
+  FAIL  deployment reporter: 0/1 ready
+  PASS  deployment metrics: 1/1 ready
+  PASS  no pods in CrashLoopBackOff
+  PASS  ServiceAccount debug-lab/reporter can list pods
+  PASS  backend answers on http://backend:8080/healthz
+  PASS  gateway /status reports backend=ok
+  FAIL  reporter /report does not return a pod count
+
+2 check(s) failing, 9 passing.
