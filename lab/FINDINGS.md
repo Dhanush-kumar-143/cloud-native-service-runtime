@@ -51,25 +51,10 @@ The existing migration Job had an immutable pod template, so deleted the old Job
 
 ## Defect 3
 
-**Symptom:**
-
-The worker pod entered `CrashLoopBackOff` and its logs reported that it could not initialise its cache because `/var/cache/app` was on a read-only filesystem.
-
-**Cause:**
-
-The worker container had `readOnlyRootFilesystem: true` but no writable volume mounted at `/var/cache/app`.
-
-**Fix:**
-
-Added an `emptyDir` volume named `worker-cache` to the worker pod and mounted it at `/var/cache/app` in the worker container. Kept `readOnlyRootFilesystem: true`.
-
-**How I found it:**
-
-1. Ran `kubectl logs worker-85c774d568-kzvxw -n debug-lab --previous` and found the cache directory error.
-2. Inspected the worker pod using `kubectl describe pod`.
-3. Added the writable cache volume and mount in `broken-chart/templates/worker.yaml`.
-4. Reran `scenario.sh up`.
-5. Confirmed the new worker pod started with zero restarts and showed `/var/cache/app` mounted as writable. The pod was still not Ready because its readiness probe checked port 8080 while the application listened on port 8081; this is a separate issue.
+**Symptom:** Worker crashed because /var/cache/app was on a read-only filesystem
+**Cause:** No writable volume was mounted at /var/cache/app
+**Fix:** Added an emptyDir volume named worker-cache and mounted it at /var/cache/app
+**How I found it:** Worker logs showed the cache initialization error; after the fix, the new pod started with zero restarts and showed the writable mount. 
 
 ---
 

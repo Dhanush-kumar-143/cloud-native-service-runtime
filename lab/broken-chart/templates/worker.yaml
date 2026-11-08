@@ -24,6 +24,9 @@ spec:
           ports:
             - name: http
               containerPort: {{ .Values.common.port }}
+          volumeMounts:
+            - name: worker-cache
+              mountPath: /var/cache/app
           env:
             {{- range $name, $value := .Values.worker.env }}
             - name: {{ $name }}
@@ -45,3 +48,6 @@ spec:
               drop: ["ALL"]
           resources:
             {{- toYaml .Values.worker.resources | nindent 12 }}
+          volumes:
+            - name: worker-cache
+              emptyDir: {}
