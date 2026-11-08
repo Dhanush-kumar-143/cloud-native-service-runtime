@@ -12,13 +12,13 @@ commit that file alongside this one.
 
 ## Defect 1
 
-**Symptom** (what you observed — paste the real command output):
+**Symptom** (what you observed — paste the real command output):  scenario.sh up reported that Job.batch "migrate" is invalid because spec.template.spec.restartPolicy must be OnFailure or Never.
 
-**Cause** (the actual root cause, not the symptom restated):
+**Cause** (the actual root cause, not the symptom restated): broken-chart/templates/migrate-job.yaml sets restartPolicy: Always, which is invalid for a Job.
 
-**Fix** (what you changed, and why this over alternatives):
+**Fix** (what you changed, and why this over alternatives): Changed the restartPolicy: Always -> restartPolicy: OnFailure
 
-**How I found it** (the sequence of commands/reasoning that led you here):
+**How I found it** (the sequence of commands/reasoning that led you here): Ran scenario.sh up, inspected kubectl get jobs -n debug-lab -o yaml, then searched the chart templates for kind: Job and restartPolicy.
 
 ---
 
