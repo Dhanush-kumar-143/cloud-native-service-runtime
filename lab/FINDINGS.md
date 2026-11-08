@@ -60,13 +60,24 @@ The existing migration Job had an immutable pod template, so deleted the old Job
 
 ## Defect 4
 
-**Symptom:**
+**Symptom:** The worker container started but remained NotReady because its readiness probe checked port 8080 while the application listened on port 8081.
 
-**Cause:**
+**Cause:** The image defaults to port 8081 for the worker. The chart configured the container port and readiness probe using the common port 8080 but did not override the application's default port.
 
-**Fix:**
+**Fix:** Added PORT: "8080" to the worker environment in broken-chart/values.yaml. This makes the application listen on the same port used by the worker container and readiness probe.
 
-**How I found it:**
+**How I found it:** 
+1. Ran kubectl logs worker-f749d965c-zcvj2 -n debug-lab and observed that the application listened on port 8081.
+
+2. Ran kubectl describe pod worker-f749d965c-zcvj2 -n debug-lab and found readiness probe failures connecting to port 8080.
+
+3. Inspected broken-chart/values.yaml and broken-chart/templates/worker.yaml.
+
+4. Added PORT: "8080" to the worker environment and reran scenario.sh up.
+
+5. Confirmed the new worker pod became 1/1 Running, and its logs showed /healthz returning HTTP 200.
+
+6. Reran scenario.sh verify; the worker readiness check passed.
 
 ---
 

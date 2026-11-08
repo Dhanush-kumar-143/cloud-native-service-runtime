@@ -50,6 +50,7 @@ worker:
     APP_MODE: "worker"
     APP_NAME: "worker"
     VERSION: "2.0.0"
+    PORT: "8080"
   resources:
     requests:
       cpu: "50m"
