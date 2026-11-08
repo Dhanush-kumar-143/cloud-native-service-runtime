@@ -90,15 +90,12 @@ The existing migration Job had an immutable pod template, so deleted the old Job
 
 ---
 
-## Defect 6
+### Defect 6: Gateway port and backend URL misconfiguration
 
-**Symptom:**
-
-**Cause:**
-
-**Fix:**
-
-**How I found it:**
+- **Symptom:** Gateway was Running but not Ready, and `/status` did not report `backend=ok`.
+- **Cause:** The application defaulted to port 8081 while the readiness probe checked 8080. The backend URL also pointed to `backend.default.svc` instead of the backend Service in `debug-lab`.
+- **Fix:** Set `PORT: "8080"` and `BACKEND_URL: "http://backend:8080"` under `gateway.env` in `values.yaml`.
+- **Verification:** Gateway became 1/1 Ready. Verification passed gateway readiness and `gateway /status reports backend=ok`.
 
 ---
 
