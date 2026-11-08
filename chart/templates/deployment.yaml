@@ -21,7 +21,7 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - containerPort: 8080
+            - containerPort: {{ .Values.service.targetPort }}
           env:
             - name: APP_NAME
               value: {{ .Values.config.appName | quote }}
@@ -34,19 +34,20 @@ spec:
           livenessProbe:
             httpGet:
               path: /healthz
-              port: 8080
+              port: {{ .Values.service.targetPort }}
             initialDelaySeconds: 10
             periodSeconds: 10
           readinessProbe:
             httpGet:
               path: /healthz
-              port: 8080
+              port: {{ .Values.service.targetPort }}
             initialDelaySeconds: 3
             periodSeconds: 5
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           securityContext:
             runAsNonRoot: true
+            runAsUser: 10001
       volumes:
         - name: app-config
           configMap:
